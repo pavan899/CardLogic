@@ -88,7 +88,6 @@ const Rummy = () => {
     <div className="mobileModal">
       <Header />
       <Board />
-      <img src='./Assets/UI.svg' style={{ height: '100%', width: 'auto', position: 'absolute', opacity: 0.2, left: 0, top: 0 }} />
       <div className="opencardDeck">
         <CardDeck openJoker={openJoker} />
       </div>
