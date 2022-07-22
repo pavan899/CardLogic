@@ -23,18 +23,20 @@ const checkSetType = (cards, numbers, JokerCount) => {
             }
         }
     }else{
-        var count = JokerCount;
-        var cardNumbers = numbers.sort((a,b)=>a-b);
+        var count = JokerCount; // 1
+        var cardNumbers = numbers.sort((a,b)=>a-b);  // [1, 3, 4]
         var valid = 0;
         for(var i =0; i<cardNumbers.length - 1;i++){
             var j = i+1;
-            if(j<=cardNumbers.length){
-                if(cardNumbers[i]-cardNumbers[j]<=(count)){
+            if(j<cardNumbers.length){
+                if((cardNumbers[j]-cardNumbers[i]- 1)<=(count)){
+                    count-=(cardNumbers[j]-cardNumbers[i]-1);
                     valid += 1;
                 }
             }
         }
-        if(valid === (numbers.length-1)&&(uniqueShape.length===1||uniqueCards.length===1)){
+        console.log("valid: ", valid)
+        if(valid === (numbers.length - 1)&&(uniqueShape.length === 1||uniqueCards.length === 1)){
             return {
                 status: true,
                 type: 'impure'
