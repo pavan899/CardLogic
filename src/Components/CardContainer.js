@@ -38,7 +38,7 @@ const move = (source, destination, droppableSource, droppableDestination) => {
 };
 const grid = 8;
 
-const getItemStyle = (isDragging, draggableStyle) => ({
+const getItemStyle = (draggableStyle, index, el) => ({
   // some basic styles to make the items look a bit nicer
   userSelect: "none",
 
@@ -53,11 +53,13 @@ const getListStyle = isDraggingOver => ({
   background: "transparent",
   width: 'fit-content',
   display: 'flex',
-  padding: '0 4%',
-  minWidth: '10%',
+  padding: '0 39px 0 0',
+  float: 'left',
   maxWidth: '80%',
-  margin: '23px 3.5% 0 3.5%',
-  minHeight: '10vh'
+  minHeight: '10vh',
+  margin: '10px 4.5px',
+  position: 'relative',
+  order: 1
 });
 
 function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, openJoker }) {
@@ -110,10 +112,10 @@ function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, open
   }
   return (
     <div>
-      <div style={{ display: "flex", flexWrap: 'wrap', width: '90%', margin: 'auto', justifyContent: 'flex-start' }}>
-        <DragDropContext onDragEnd={onDragEnd}>
+      <div style={{ width: '90%', margin: 'auto' }}>
+        <DragDropContext onDragEnd={onDragEnd} onDragStart={()=>updateSelectedCards([])}>
           {state.map((el, ind) => (
-            <Droppable key={ind} droppableId={`${ind}`} direction="horizontal">
+            el.length>0&&<Droppable key={ind} droppableId={`${ind}`} direction="horizontal">
               {(provided, snapshot) => (
                 <div
                   ref={provided.innerRef}
@@ -133,18 +135,20 @@ function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, open
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           style={getItemStyle(
-                            snapshot.isDragging,
-                            provided.draggableProps.style
+                            provided.draggableProps.style,
+                            index,
+                            el
                           )}
                         >
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-around",
+                              justifyContent: "flex-start",
                               position: 'relative'
                             }}
                           >
                             <img src={`./Assets/Cards/${item.image}`} className="CardImage" onClick={(e)=>cardClicked(e, item)}/>
+                            {openJoker[0].number===item.number&&<img src='./Assets/Cards/joker-min.svg' className="jokerIcon" />}
                             {selectedCards.includes(item)&&<img src="./Assets/Cards/finish_deck_single_row.svg" style={{position: 'absolute', top: '0'}} className="CardImage" onClick={(e)=>cardClicked(e, item)} />}
                           </div>
                         </div>
@@ -152,7 +156,7 @@ function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, open
                     </Draggable>
                   })}
                   {provided.placeholder}
-                  {SetValidation(el, el.length, openJoker) && "S"}
+                  {SetValidation(el, el.length, openJoker).status ? <div className="validityStatus">Valid</div>: <div className="validityStatus"><img src="./Assets/Icons/Invalid.svg" className="icons" /><span>Invalid <span className="score">({SetValidation(el, el.length, openJoker).score})</span></span></div>}
                 </div>
               )}
             </Droppable>
