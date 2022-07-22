@@ -156,6 +156,7 @@ function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, open
                     </Draggable>
                   })}
                   {provided.placeholder}
+                  {console.log("open joker: ", SetValidation(el, el.length, openJoker))}
                   {SetValidation(el, el.length, openJoker).status ? <div className="validityStatus">Valid</div>: <div className="validityStatus"><img src="./Assets/Icons/Invalid.svg" className="icons" /><span>Invalid <span className="score">({SetValidation(el, el.length, openJoker).score})</span></span></div>}
                 </div>
               )}

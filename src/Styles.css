@@ -9,8 +9,10 @@ body {
 }
 
 .mobileModal {
-    width: 340px;
-    height: 735px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 100vh;
+    height: 100vh;
     background-color: #1d5648;
     margin: auto;
     position: relative;

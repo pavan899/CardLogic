@@ -190,5 +190,21 @@ export const Cards = [
         Points: 5,
         image: '5h-min.svg',
         selected: false
+    },{
+        id: 20,
+        name: 'Spades 5',
+        shape: 'Spades',
+        number: 5,
+        Points: 5,
+        image: '5s-min.svg',
+        selected: false
+    },{
+        id: 21,
+        name: 'Clubs 6',
+        shape: 'Clubs',
+        number: 6,
+        Points: 6,
+        image: '6c-min.svg',
+        selected: false
     }
 ]

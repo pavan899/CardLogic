@@ -10,11 +10,11 @@ import CardDeck from './Components/CardDeck';
 import ButtonContainer from './Components/ButtonContainer';
 
 
-
+var cardCount = 21;
 const FirstDeck = () => {
   var arr = [];
   while (arr.length < 13) {
-    var r = Math.floor(Math.random() * 19);
+    var r = Math.floor(Math.random() * cardCount);
     if (arr.indexOf(Cards[r]) === -1) {
       arr.push(Cards[r]);
     }
@@ -25,7 +25,7 @@ const FirstDeck = () => {
 const setJoker = (cards) => {
   var arr = [];
   while (arr.length < 1) {
-    var r = Math.floor(Math.random() * 19);
+    var r = Math.floor(Math.random() * cardCount);
     if (arr.indexOf(Cards[r]) === -1) {
       (!cards.includes(Cards[r]))&&arr.push(Cards[r])
     }
@@ -36,7 +36,7 @@ const setJoker = (cards) => {
 const setOpenCard = (cards) => {
   var arr = [];
   while (arr.length < 1) {
-    var r = Math.floor(Math.random() * 19);
+    var r = Math.floor(Math.random() * cardCount);
     if (arr.indexOf(Cards[r]) === -1) {
       (!cards.includes(Cards[r]))&&arr.push(Cards[r])
     }
@@ -53,16 +53,20 @@ const Rummy = () => {
   const [openJoker, updateOpenJoker] = React.useState(initialOpenJoker)
   const [selectedCards, updateSelectedCards] = React.useState([]);
   const [openCard, updateOpenCard] = React.useState(initialOpenCard);
+  const [finishCard, updateFinishCard] = React.useState([]);
   const [totalCards, updateTotalCards] = React.useState(13)
   if (!initialStoredDeck) {
     updateCards(FirstDeck());
   }
   if (!initialOpenJoker) {
-    updateOpenJoker(setJoker(cards));
+    cards&&updateOpenJoker(setJoker(cards));
   }
   if (!initialOpenCard) {
-    updateOpenCard(setOpenCard(cards));
+    cards&&updateOpenCard(setOpenCard(cards));
   }
+  React.useEffect(()=>{
+    window.localStorage.setItem("openCard", JSON.stringify(openCard))
+  }, [openCard])
   const sortCards = () =>{
     const cards = JSON.parse(window.localStorage.getItem("InitialDeck"));
     if(cards.length === 1){
@@ -78,7 +82,23 @@ const Rummy = () => {
     }
   }
   const finishGame = () =>{
-
+    var filteredCards = [];
+    if(selectedCards.length === 1){
+      if (cards.length === 1) {
+        filteredCards = cards[0].filter((card) => {
+          return !selectedCards.includes(card);
+        });
+      } else {
+        filteredCards = cards.map((card) => {
+          return card.filter((cd) => {
+            return !selectedCards.includes(cd);
+          })
+        })
+        updateCards([...filteredCards]);
+      }
+      updateFinishCard(selectedCards)
+      updateSelectedCards([]);
+    }
   }
   const groupCards = () => {
     var filteredCards = [];
@@ -113,6 +133,7 @@ const Rummy = () => {
         })
         updateCards([...filteredCards]);
       }
+      updateOpenCard(selectedCards)
       updateSelectedCards([]);
     }
   }
@@ -134,28 +155,60 @@ const Rummy = () => {
     }
     return count;
   }
-  const openCardClicked = (openCard) =>{
-    var newCards;
-    // if (cards.length === 1) {
-    //   newCards = [...cards[0], openCard]
-    // }else{
-    //   cards.map((card, index) => {
-    //     return newCards = (cards.length-1 === index)&&([...card, openCard])
-    //   })
-    // }
-    console.log(newCards)
+  const openCardClicked = (openCard) => {
+    if (CountCards(cards) === 13) {
+      var newCards = cards;
+      if (cards.length === 1) {
+        newCards = [[...newCards[0], ...openCard]];
+        updateCards(newCards);
+      } else {
+        newCards[newCards.length - 1] = [...newCards[newCards.length - 1], ...openCard];
+      }
+      const values = [...newCards];
+      updateCards(values);
+      updateOpenCard([])
+    }
+  }
+  const unusedCards = () =>{
+    var arr = [];
+    while (arr.length < 1) {
+      var r = Math.floor(Math.random() * cardCount);
+      if (arr.indexOf(cards[r]) === -1) {
+        arr.push(Cards[r])
+      }
+    }
+    return arr;
+  }
+  const setClosedCard = () =>{
+    var openCard = unusedCards()
+    if (CountCards(cards) === 13) {
+      var newCards = cards;
+      if (cards.length === 1) {
+        newCards = [[...newCards[0], ...openCard]];
+        updateCards(newCards);
+      } else {
+        newCards[newCards.length - 1] = [...newCards[newCards.length - 1], ...openCard];
+      }
+      const values = [...newCards];
+      updateCards(values);
+    }
+    unusedCards()
+  }
+  const dropCard =() =>{
+    window.localStorage.clear();
+    window.location.reload();
   }
   return <>
     <div className="mobileModal">
       <Header />
       <Board />
       <div className="opencardDeck">
-        <CardDeck openCard={openCard} openJoker={openJoker} openCardClicked={openCardClicked} />
+        <CardDeck setClosedCard={setClosedCard} finishCard={finishCard} openCard={openCard} openJoker={openJoker} openCardClicked={openCardClicked} />
       </div>
       <div style={{ position: 'absolute', top: '57%', width: '100%' }}>
         <CardContainer selectedCards={selectedCards} updateSelectedCards={updateSelectedCards} updateCards={updateCards} Cards={cards} openJoker={openJoker} />
       </div>
-      <ButtonContainer totalCards={totalCards} selectedCards={selectedCards} Cards={cards} discardCard={discardCard} finishGame={finishGame} groupCards={groupCards} sortCards={sortCards} />
+      <ButtonContainer dropCard={dropCard} totalCards={totalCards} selectedCards={selectedCards} Cards={cards} discardCard={discardCard} finishGame={finishGame} groupCards={groupCards} sortCards={sortCards} />
       <Footer />
     </div>
   </>

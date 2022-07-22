@@ -1,24 +1,44 @@
 import React from 'react';
 
-const checkSetType = (cards, numbers) =>{
+const checkSetType = (cards, numbers, JokerCount) => {
     const uniqueShape = [...new Set(cards.map(card => card.shape))];
+    const uniqueCards = [...new Set(numbers.map(card => card))];
     // Checks if the cards are unique shape
-    if (uniqueShape.length === 1) {
-        const differenceAry = numbers.sort((a, b) => a - b).slice(1).map(function (n, i) { return n - numbers[i]; })
-        const isSequence = differenceAry.every(value => value == 1);
-        if (isSequence) {
-            return {
-                status: true,
-                type: 'pure'
-            };
+    if (!JokerCount || JokerCount<0) {
+        if (uniqueShape.length === 1) {
+            const differenceAry = numbers.sort((a, b) => a - b).slice(1).map(function (n, i) { return n - numbers[i]; })
+            const isSequence = differenceAry.every(value => value == 1);
+            if (isSequence) {
+                return {
+                    status: true,
+                    type: 'pure'
+                };
+            }
+        } else {
+            if (uniqueCards.length === 1) {
+                return {
+                    status: true,
+                    type: 'set'
+                };
+            }
         }
-    } else {
-        const uniqueCards = [...new Set(numbers.map(card => card))];
-        if (uniqueCards.length === 1) {
+    }else{
+        var count = JokerCount;
+        var cardNumbers = numbers.sort((a,b)=>a-b);
+        var valid = 0;
+        for(var i =0; i<cardNumbers.length - 1;i++){
+            var j = i+1;
+            if(j<=cardNumbers.length){
+                if(cardNumbers[i]-cardNumbers[j]<=(count)){
+                    valid += 1;
+                }
+            }
+        }
+        if(valid === (numbers.length-1)&&(uniqueShape.length===1||uniqueCards.length===1)){
             return {
                 status: true,
-                type: 'set'
-            };
+                type: 'impure'
+            }
         }
     }
 }
@@ -34,6 +54,7 @@ const checkScore = (cards, openJoker) =>{
 }
 const SetValidation = (cards, count, openJoker) => {
     // Checks if three or more cards are present
+    const [joker] = openJoker;
     if (count < 3) return {
         status: false,
         score: checkScore(cards, openJoker)
@@ -44,19 +65,21 @@ const SetValidation = (cards, count, openJoker) => {
             return card.number;
         })
         // checks if the cards are same shape
-        if(checkSetType(cards, numbers)){
-            return checkSetType(cards, numbers);
+        if(checkSetType(cards, numbers, false)){
+            return checkSetType(cards, numbers, false);
         };
-        const [joker] = openJoker;
         if (numbers.includes(joker.number)) {
             // const luckySequence = differenceAry.every(value => value == differenceAry.length - 1);
             const jokerExcluded = cards.filter((card) => {
                 return card.number !== joker.number;
             })
+            const JokerCount = cards.filter((card) => {
+                return card.number === joker.number;
+            })
             const values = jokerExcluded.map((card) => {
                 return card.number;
             })
-            if(checkSetType(jokerExcluded, values)){
+            if(checkSetType(jokerExcluded, values, JokerCount.length)){
                 return {
                     status: true,
                     type: 'impure'
