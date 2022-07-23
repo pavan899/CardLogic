@@ -8,6 +8,7 @@ import './Styles.css';
 import { Cards } from "./Components/Constants";
 import CardDeck from './Components/CardDeck';
 import ButtonContainer from './Components/ButtonContainer';
+import Popup from './Components/Popup';
 
 
 var cardCount = 21;
@@ -54,7 +55,38 @@ const Rummy = () => {
   const [selectedCards, updateSelectedCards] = React.useState([]);
   const [openCard, updateOpenCard] = React.useState(initialOpenCard);
   const [finishCard, updateFinishCard] = React.useState([]);
-  const [totalCards, updateTotalCards] = React.useState(13)
+  const [totalCards, updateTotalCards] = React.useState(13);
+  const [containerWidth, updateWidth] = React.useState(0);
+  const mainContainer = React.useRef(null);
+  const closePopup = () =>{
+    updatePopup(null);
+    updateFinishCard([]);
+  }
+  const newGame=()=>{
+    window.localStorage.clear();
+    window.location.reload();
+  }
+  const dropCard =() =>{
+    const popupContent = {
+      message: 'Are you sure you want to finish?',
+      type: "finish",
+      buttons: [{
+        title: "yes",
+        color: '#41a140',
+        action: ()=>{closePopup();newGame();}
+      }, {
+        title: "no",
+        color: '#1976d2',
+        action: closePopup
+      }],
+      disclaimer: '* This will start a new game'
+    }
+    updatePopup(popupContent)
+  }
+  const [popup, updatePopup] = React.useState(null);
+  React.useEffect(()=>{
+    mainContainer&&updateWidth(mainContainer.current.offsetWidth)
+  }, [mainContainer])
   if (!initialStoredDeck) {
     updateCards(FirstDeck());
   }
@@ -84,19 +116,34 @@ const Rummy = () => {
   const finishGame = () =>{
     var filteredCards = [];
     if(selectedCards.length === 1){
-      if (cards.length === 1) {
-        filteredCards = cards[0].filter((card) => {
-          return !selectedCards.includes(card);
-        });
-      } else {
-        filteredCards = cards.map((card) => {
-          return card.filter((cd) => {
-            return !selectedCards.includes(cd);
-          })
-        })
-        updateCards([...filteredCards]);
+      // if (cards.length === 1) {
+      //   filteredCards = cards[0].filter((card) => {
+      //     return !selectedCards.includes(card);
+      //   });
+      // } else {
+      //   filteredCards = cards.map((card) => {
+      //     return card.filter((cd) => {
+      //       return !selectedCards.includes(cd);
+      //     })
+      //   })
+      //   updateCards([...filteredCards]);
+      // }
+      // updateFinishCard(selectedCards)
+      const popupContent = {
+        message: 'Are you sure you want to finish?',
+        type: "finish",
+        buttons: [{
+          title: "yes",
+          color: '#41a140',
+          action: ()=>{closePopup();newGame();}
+        }, {
+          title: "no",
+          color: '#1976d2',
+          action: closePopup
+        }],
+        disclaimer: '* This will start a new game'
       }
-      updateFinishCard(selectedCards)
+      updatePopup(popupContent)
       updateSelectedCards([]);
     }
   }
@@ -194,22 +241,19 @@ const Rummy = () => {
     }
     unusedCards()
   }
-  const dropCard =() =>{
-    window.localStorage.clear();
-    window.location.reload();
-  }
   return <>
-    <div className="mobileModal">
+    <div className="mobileModal" id="mobileModal" ref={mainContainer}>
       <Header />
       <Board />
       <div className="opencardDeck">
         <CardDeck setClosedCard={setClosedCard} finishCard={finishCard} openCard={openCard} openJoker={openJoker} openCardClicked={openCardClicked} />
       </div>
       <div style={{ position: 'absolute', top: '57%', width: '100%' }}>
-        <CardContainer selectedCards={selectedCards} updateSelectedCards={updateSelectedCards} updateCards={updateCards} Cards={cards} openJoker={openJoker} />
+        <CardContainer containerWidth={containerWidth} selectedCards={selectedCards} updateSelectedCards={updateSelectedCards} updateCards={updateCards} Cards={cards} openJoker={openJoker} />
       </div>
       <ButtonContainer dropCard={dropCard} totalCards={totalCards} selectedCards={selectedCards} Cards={cards} discardCard={discardCard} finishGame={finishGame} groupCards={groupCards} sortCards={sortCards} />
       <Footer />
+      {popup&&<Popup data={popup} closePopup={closePopup} />}
     </div>
   </>
 }

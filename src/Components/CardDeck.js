@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const CardDeck = ({setClosedCard, finishCard, openJoker, openCard, openCardClicked}) =>{
     const [joker] = openJoker;
+    const openCardDom = React.useRef(null)
     return <div className="openDeckMain">
         <div className="opencardContainer">
             <img src="./Assets/Cards/back_card_single_row.svg" className="cardBackimage" onClick={setClosedCard} />
@@ -11,7 +12,7 @@ const CardDeck = ({setClosedCard, finishCard, openJoker, openCard, openCardClick
         </div>
         <div style={{left: '5px'}}>
             {openCard.length?(
-                <img className="cardBackimage" src={`./Assets/Cards/${openCard[0].image}`} onClick={()=>openCardClicked(openCard)}/>
+                <img className="cardBackimage" src={`./Assets/Cards/${openCard[0].image}`} ref={openCardDom} onClick={()=>openCardClicked(openCard)}/>
             ):(
                 <img src="./Assets/Cards/finish_deck_single_row.svg" className="finishDeck" style={{height: '75%', opacity: '0.8'}} />
             )}

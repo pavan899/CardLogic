@@ -4,6 +4,7 @@ import './CardContainer.css';
 import SetValidation from './SetValidation';
 
 var position = 0;
+const order = [2, 3, 4, 1]
 
 // fake data generator
 const getItems = (count, offset = 0) =>
@@ -49,21 +50,30 @@ const getItemStyle = (draggableStyle, index, el) => ({
   // styles we need to apply on draggables
   ...draggableStyle
 });
-const getListStyle = isDraggingOver => ({
-  background: "transparent",
-  width: 'fit-content',
-  display: 'flex',
-  padding: '0 39px 0 0',
-  float: 'left',
-  maxWidth: '80%',
-  minHeight: '10vh',
-  margin: '10px 4.5px',
-  position: 'relative',
-  order: 1
-});
 
-function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, openJoker }) {
+function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, openJoker, containerWidth }) {
   const [state, setState] = useState(Cards);
+  const getListStyle = (isDraggingOver, el) => {
+    const cards = el;
+    var width = 0;
+    const PMWidth = 48;
+    cards.map((card)=>{
+      width+=20;
+    }) 
+    const orderValue = containerWidth - (width + PMWidth);
+    return {
+    background: "transparent",
+    width: 'fit-content',
+    display: 'flex',
+    padding: '0 39px 0 0',
+    float: 'left',
+    maxWidth: '80%',
+    minHeight: '10vh',
+    margin: '10px 4.5px',
+    position: 'relative',
+    order: orderValue
+  }
+  };
   React.useEffect(() => {
     setState(Cards);
     window.localStorage.setItem("InitialDeck", JSON.stringify(Cards))
@@ -112,14 +122,14 @@ function RummyApp({ selectedCards, updateSelectedCards, updateCards, Cards, open
   }
   return (
     <div>
-      <div style={{ width: '90%', margin: 'auto' }}>
+      <div style={{ width: '90%', margin: 'auto', display: 'flex', flexWrap: 'wrap' }}>
         <DragDropContext onDragEnd={onDragEnd} onDragStart={()=>updateSelectedCards([])}>
           {state.map((el, ind) => (
             el.length>0&&<Droppable key={ind} droppableId={`${ind}`} direction="horizontal">
               {(provided, snapshot) => (
                 <div
                   ref={provided.innerRef}
-                  style={getListStyle(snapshot.isDraggingOver)}
+                  style={getListStyle(snapshot.isDraggingOver, el)}
                   {...provided.droppableProps}
                 >
                   {el.map((item, index) => {
